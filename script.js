@@ -110,6 +110,8 @@ function startGame() {
     gameState.basketX = 0.5;
     updateHud();
     updateBasket();
+    // カゴを常に表示
+    document.getElementById("basket").style.display = "flex";
     startTimer();
     gameState.lastSpawnTime = performance.now();
     gameState.animationId = requestAnimationFrame(gameLoop);
@@ -128,6 +130,11 @@ function resetGame() {
     if (gameState.timerId) clearInterval(gameState.timerId);
     clearPlayArea();
     updateHud();
+    // カゴを初期位置で再表示
+    setTimeout(() => {
+        updateBasket();
+        document.getElementById("basket").style.display = "flex";
+    }, 0);
 }
 
 // ゲーム終了
@@ -136,6 +143,8 @@ function endGame() {
     if (gameState.animationId) cancelAnimationFrame(gameState.animationId);
     if (gameState.timerId) clearInterval(gameState.timerId);
     clearPlayArea();
+    // カゴを非表示
+    document.getElementById("basket").style.display = "none";
     showResult();
 }
 
