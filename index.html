@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>星あつめナイト</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="app">
+        <section id="title-screen" class="screen">
+            <h1>星あつめナイト</h1>
+            <p>夜空からふる思い出をタップで集めよう</p>
+            <button id="start-button" class="retro-button">スタート</button>
+            <button id="howto-button" class="retro-button">あそびかた</button>
+        </section>
+        <section id="howto-screen" class="screen hidden">
+            <h2>あそびかた</h2>
+            <p>落ちてくるアイテムをタップして点数を集めよう</p>
+            <ul>
+                <li>★ 星：+10点</li>
+                <li>○ ラムネ：+30点</li>
+                <li>♪ 鈴：+50点</li>
+                <li>■ 石：-20点</li>
+                <li>● 黒い影：-50点</li>
+            </ul>
+            <button id="howto-start-button" class="retro-button">スタート</button>
+            <button id="back-title-button" class="retro-button">タイトルへ</button>
+        </section>
+        <section id="game-screen" class="screen hidden">
+            <div id="hud">
+                <span id="time-label">TIME: 30</span>
+                <span id="score-label">SCORE: 0</span>
+                <button id="pause-button" class="retro-button">PAUSE</button>
+            </div>
+            <div id="play-area"></div>
+            <div id="pause-panel" class="hidden">
+                <h2>PAUSE</h2>
+                <button id="resume-button" class="retro-button">再開</button>
+                <button id="pause-title-button" class="retro-button">タイトルへ</button>
+            </div>
+        </section>
+        <section id="result-screen" class="screen hidden">
+            <h2 id="result-title">RESULT</h2>
+            <p id="final-score">SCORE: 0</p>
+            <p id="rank-label">RANK: C</p>
+            <p id="result-comment"></p>
+            <button id="retry-button" class="retro-button">もう一回</button>
+            <button id="result-title-button" class="retro-button">タイトルへ</button>
+        </section>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
