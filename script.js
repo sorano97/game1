@@ -32,6 +32,9 @@ function init() {
     createStarsBackground();
     setupEventListeners();
     setupBasketControl();
+    // カゴを常に表示
+    const basket = document.getElementById("basket");
+    if (basket) basket.style.display = "flex";
 }
 
 // 画面切り替え
