@@ -18,7 +18,7 @@
         </section>
         <section id="howto-screen" class="screen hidden">
             <h2>あそびかた</h2>
-            <p>落ちてくるアイテムをタップして点数を集めよう</p>
+            <p>落ちてくるアイテムをカゴでキャッチして点数を集めよう</p>
             <ul>
                 <li>★ 星：+10点</li>
                 <li>○ ラムネ：+30点</li>
@@ -30,12 +30,14 @@
             <button id="back-title-button" class="retro-button">タイトルへ</button>
         </section>
         <section id="game-screen" class="screen hidden">
+            <div id="play-area">
+                <div id="basket"></div>
+            </div>
             <div id="hud">
                 <span id="time-label">TIME: 30</span>
                 <span id="score-label">SCORE: 0</span>
                 <button id="pause-button" class="retro-button">PAUSE</button>
             </div>
-            <div id="play-area"></div>
             <div id="pause-panel" class="hidden">
                 <h2>PAUSE</h2>
                 <button id="resume-button" class="retro-button">再開</button>

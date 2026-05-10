@@ -12,7 +12,9 @@ const gameState = {
     lastSpawnTime: 0,
     spawnInterval: 800,
     animationId: null,
-    timerId: null
+    timerId: null,
+    basketX: 0.5,    // カゴの中心位置（0.0〜1.0, 画面幅比率）
+    basketWidth: 80, // カゴの幅(px)
 };
 
 // アイテムの種類データ
@@ -29,6 +31,7 @@ function init() {
     showScreen("title");
     createStarsBackground();
     setupEventListeners();
+    setupBasketControl();
 }
 
 // 画面切り替え
@@ -55,13 +58,58 @@ function setupEventListeners() {
     }, { passive: false });
 }
 
+// カゴの操作（タッチ・マウス）
+function setupBasketControl() {
+    const playArea = document.getElementById("play-area");
+    let dragging = false;
+    let offsetX = 0;
+
+    // タッチ・マウス共通の座標取得
+    function getX(e) {
+        if (e.touches) return e.touches[0].clientX;
+        return e.clientX;
+    }
+
+    // ドラッグ開始
+    function startDrag(e) {
+        if (!gameState.isPlaying || gameState.isPaused) return;
+        dragging = true;
+        offsetX = getX(e);
+        e.preventDefault();
+    }
+    // ドラッグ中
+    function onDrag(e) {
+        if (!dragging) return;
+        const playRect = playArea.getBoundingClientRect();
+        let x = getX(e);
+        let rel = (x - playRect.left) / playRect.width;
+        rel = Math.max(0, Math.min(1, rel));
+        gameState.basketX = rel;
+        updateBasket();
+    }
+    // ドラッグ終了
+    function endDrag(e) {
+        dragging = false;
+    }
+    // イベント登録
+    const basket = document.getElementById("basket");
+    basket.addEventListener("touchstart", startDrag);
+    basket.addEventListener("mousedown", startDrag);
+    window.addEventListener("touchmove", onDrag);
+    window.addEventListener("mousemove", onDrag);
+    window.addEventListener("touchend", endDrag);
+    window.addEventListener("mouseup", endDrag);
+}
+
 // ゲーム開始
 function startGame() {
     resetGame();
     showScreen("game");
     gameState.isPlaying = true;
     gameState.isPaused = false;
+    gameState.basketX = 0.5;
     updateHud();
+    updateBasket();
     startTimer();
     gameState.lastSpawnTime = performance.now();
     gameState.animationId = requestAnimationFrame(gameLoop);
@@ -124,6 +172,7 @@ function gameLoop(timestamp) {
         updateSpawnInterval();
         updateItems();
         maybeSpawnItem(timestamp);
+        checkCatch();
     }
     gameState.animationId = requestAnimationFrame(gameLoop);
 }
@@ -175,10 +224,6 @@ function spawnItem() {
     el.style.width = "48px";
     el.style.height = "48px";
     el.setAttribute("data-id", itemId);
-    // タップ/クリックイベント
-    el.addEventListener("pointerdown", (e) => {
-        handleItemTap(itemId, e);
-    });
     playArea.appendChild(el);
 }
 
@@ -219,24 +264,36 @@ function removeItem(itemId) {
     if (el) el.remove();
 }
 
-// アイテムタップ処理
-function handleItemTap(itemId, event) {
-    if (!gameState.isPlaying || gameState.isPaused) return;
-    const idx = gameState.items.findIndex(it => it.id === itemId);
-    if (idx === -1) return; // すでに消えていたら無視
-    const item = gameState.items[idx];
-    // スコア加算
-    gameState.score += item.score;
-    updateHud();
-    // ポップアップ演出
-    const rect = event.target.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top;
-    showScorePopup(x, y, item.score);
-    // 減点なら画面フラッシュ
-    if (item.score < 0) flashDanger();
-    // アイテム削除
-    removeItem(itemId);
+// カゴでキャッチ判定
+function checkCatch() {
+    const playArea = document.getElementById("play-area");
+    const basket = document.getElementById("basket");
+    const areaWidth = playArea.offsetWidth;
+    const areaHeight = playArea.offsetHeight;
+    const basketWidth = gameState.basketWidth;
+    const basketX = gameState.basketX * areaWidth;
+    const basketY = areaHeight - 36 - 12; // #basketのbottom:12px, height:36px
+    for (let i = gameState.items.length - 1; i >= 0; i--) {
+        const item = gameState.items[i];
+        // アイテムの中心座標
+        const itemX = item.x + 24;
+        const itemY = item.y + 24;
+        // カゴの当たり判定
+        if (
+            itemY > basketY && itemY < basketY + 36 &&
+            itemX > basketX - basketWidth / 2 && itemX < basketX + basketWidth / 2
+        ) {
+            // スコア加算
+            gameState.score += item.score;
+            updateHud();
+            // ポップアップ演出
+            showScorePopup(basketX, basketY, item.score);
+            // 減点なら画面フラッシュ
+            if (item.score < 0) flashDanger();
+            // アイテム削除
+            removeItem(item.id);
+        }
+    }
 }
 
 // スコアポップアップ表示
@@ -261,6 +318,16 @@ function flashDanger() {
 function updateHud() {
     document.getElementById("time-label").textContent = `TIME: ${gameState.timeLeft}`;
     document.getElementById("score-label").textContent = `SCORE: ${gameState.score}`;
+}
+
+// カゴの位置を更新
+function updateBasket() {
+    const playArea = document.getElementById("play-area");
+    const basket = document.getElementById("basket");
+    const areaWidth = playArea.offsetWidth;
+    const x = gameState.basketX * areaWidth;
+    basket.style.left = `${x}px`;
+    basket.style.transform = "translateX(-50%)";
 }
 
 // プレイエリアのアイテム全削除
